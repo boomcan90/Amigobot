@@ -22,6 +22,8 @@ juncFwd = 40
 maxRangeOfSensor = 2.5
 rvelLimitHigh = 1
 rvelLimitLow = -1
+didTurn = False
+juncOverflow = False
 
 
 class Sensor(sm.SM):
@@ -107,7 +109,9 @@ class wallFollower(sm.SM):
             if frontWallPresent(prevFront) and frontWallPresent(nowFront):
                 fvel = 0.0
                 state = ("Wait", 0, 0, inp)
-            elif (junctionCheck(nowSensors[0:4]) or junctionCheck(nowSensors[1:5]) or junctionCheck(nowSensors[2:6])): 
+            
+
+            if (junctionCheck(nowSensors[0:4]) or junctionCheck(nowSensors[1:5]) or junctionCheck(nowSensors[2:6])): 
                 fvel = 0.0
                 rvel = 0.0
                 state = ("Junc", 0, 0, inp)
@@ -120,36 +124,42 @@ class wallFollower(sm.SM):
 
 
 
-        ## Waiting for 5 seconds. 
-
         if move is "Junc":
-            if not stickout(nowSensors):
-                print "Junc"
-                state = ("MoveAfterJunc", 0, 0, inp)
-                return (state, io.Action(fvel = fvel, rvel = rvel))
-            # state = ("End", 0, 0, inp)
+            # if stickout(nowSensors):
+            #     state = ("3wayJunc", 0, 0, inp)
+            # elif stickoutLeft(nowSensors, prevSensors):
+            #     state = ("2wayLeftStraightJunc", 0, 0)
+            # elif stickoutRight(nowSensors, prevSensors):
+            #     state = ("2wayRightStraightJunc")
 
+
+
+
+
+        ## Waiting for 15 seconds. 
 
         if move is "Wait":
-            if timer <= 50:
+            if timer <= 150:
                 fvel = 0.0
                 rvel = 0.0
                 timer +=1
                 state = ("Wait", timer, 0, inp)
             else:
                 print "Stopping"
-                state = ("MoveAfterJunc", timer, 0, inp)
+                state = ("End", timer, 0, inp)
         
 
-        if move is "MoveAfterJunc":
-            if timer <= 30:
-                fvel = 0.2
-                rvel = 0.0
-                timer += 1
-                state = ("MoveAfterJunc", timer, 0, inp)
+
+        if move is "turnLeft":
+            counter += 1
+            fvel = 0.0
+            rvel = turnAngle
+            if counter >= counterT:
+                state = ("Fwd", 0, 0, inp)
             else: 
-                print "End"
-                state = ("End", 0, 0, inp)
+                state = ("turnLeft", 0, counter, inp)
+
+
 
         ## End of movement. 
 
@@ -157,6 +167,12 @@ class wallFollower(sm.SM):
             fvel = 0.0
             rvel = 0.0
             state = ("End", 0, 0, inp)
+
+        if move is "Fwd1s":
+            fvel = 0.2
+            rvel = 0
+            counter = 1
+            state = ("Junc", 0, counter, inp)
 
 
 
@@ -179,7 +195,19 @@ def frontWallPresent(frontDistance):
 def stickout(sensors):
     if sensors[0] > maxRangeOfSensor and sensors[5] > maxRangeOfSensor:
         return True
-    print sensors[0], sensors[5]
+    # print sensors[0], sensors[5]
+    return False
+
+def stickoutLeft(sensors, oldSensors):
+    if sensors[0] > maxRangeOfSensor and oldSensors[0] > maxRangeOfSensor:
+        return True
+    # print sensors[0], sensors[5]
+    return False
+
+def stickoutRight(sensors, oldSensors):
+    if sensors[5] > maxRangeOfSensor and oldSensors[5] > maxRangeOfSensor:
+        return True
+    # print sensors[0], sensors[5]
     return False
 
 
