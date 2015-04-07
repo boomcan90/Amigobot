@@ -62,7 +62,7 @@ class WallFollower(sm.SM):
             prevRightFormula = inp[1][0]
             prevRightFormulaAvg = inp[2]
             counter = state[2]
-            sensors = inp[1]
+            sensors = inp.sensors
             timer = state[3]
             previousRightFront = state[1][1][3]
             previousRightDiag = state[1][1][4]
@@ -164,6 +164,10 @@ class WallFollower(sm.SM):
             # rvel = 0.2
             # fvel = 0.3
             print "Move forward until your sides stick out"
+            while stickout(sensors) != True:
+                io.Action(fvel = 0.2, rvel = 0)
+            # Imsert Code to turn here.
+
  
             if not (previousRight > maxReading or previousLeft > maxReading):
                 fvel = 0.2
@@ -218,6 +222,12 @@ def wallIsInfront(value):
     else:
         return False
  
+
+def stickout(sensors):
+    if sensors[0] > maxReading or sensors[5] > maxReading:
+        return True
+    return False
+
  
 def front4red(sensors):
     l = []
