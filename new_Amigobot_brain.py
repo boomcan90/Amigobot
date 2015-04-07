@@ -22,7 +22,7 @@ juncFwd = 40
 maxRangeOfSensor = 2.5
 rvelLimitHigh = 1
 rvelLimitLow = -1
-didTurn = False
+didTurn = False 
 juncOverflow = False
 
 
