@@ -1,7 +1,7 @@
 # Amigobot
 
 Things done: 
--Basic outline
+- Basic outline
 - Speed control
 - States 
 
